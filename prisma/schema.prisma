@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SprintStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+}
+
+model User {
+  id           String @id @default(uuid())
+  email        String @unique
+  passwordHash String
+  fullName     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizationMemberships OrganizationMember[]
+
+  workspaceMemberships WorkspaceMember[]
+
+  assignedTasks Task[] @relation("AssignedTasks")
+
+  createdTasks Task[] @relation("CreatedTasks")
+
+  activityEvents ActivityEvent[] @relation("ActorEvents")
+}
+
+model Organization {
+  id   String @id @default(uuid())
+  name String
+  slug String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members OrganizationMember[]
+
+  workspaces Workspace[]
+}
+
+model OrganizationMember {
+  id String @id @default(uuid())
+
+  userId         String
+  organizationId String
+
+  role OrganizationRole
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+}
+
+model Workspace {
+  id String @id @default(uuid())
+
+  name String
+  slug String
+
+  organizationId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  members WorkspaceMember[]
+
+  sprints Sprint[]
+
+  tasks Task[]
+
+  taskGroups TaskGroup[]
+
+  activityEvents ActivityEvent[]
+}
+
+model WorkspaceMember {
+  id String @id @default(uuid())
+
+  userId      String
+  workspaceId String
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+}
+
+model Sprint {
+  id String @id @default(uuid())
+
+  name String
+
+  status SprintStatus
+
+  workspaceId String
+
+  startDate DateTime
+
+  endDate DateTime
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  tasks Task[]
+}
+
+model TaskGroup {
+  id String @id @default(uuid())
+
+  name String
+
+  workspaceId String
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  tasks Task[]
+}
+
+model Task {
+  id String @id @default(uuid())
+
+  title String
+
+  description String?
+
+  status TaskStatus
+
+  priority TaskPriority
+
+  workspaceId String
+
+  sprintId String?
+
+  taskGroupId String?
+
+  assignedToId String?
+
+  createdById String
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  sprint Sprint? @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+
+  taskGroup TaskGroup? @relation(fields: [taskGroupId], references: [id], onDelete: SetNull)
+
+  assignee User? @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  creator User @relation("CreatedTasks", fields: [createdById], references: [id], onDelete: Cascade)
+
+  activityEvents ActivityEvent[]
+}
+
+model ActivityEvent {
+  id String @id @default(uuid())
+
+  action String
+
+  workspaceId String
+
+  taskId String?
+
+  actorId String
+
+  createdAt DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  task Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  actor User @relation("ActorEvents", fields: [actorId], references: [id], onDelete: Cascade)
+}
