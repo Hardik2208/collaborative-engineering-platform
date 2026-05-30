@@ -148,12 +148,46 @@ export const createTaskService =
 
 export const getTasksService =
   async (
-    workspaceId: string
+    workspaceId: string,
+    filters: {
+      status?: string;
+      assignedToId?: string;
+      sprintId?: string;
+      taskGroupId?: string;
+
+      page: number;
+      limit: number;
+    }
   ) => {
 
-    return findTasksByWorkspace(
-      workspaceId
-    );
+    const {
+      tasks,
+      total
+    } =
+      await findTasksByWorkspace(
+        workspaceId,
+        filters
+      );
+
+    return {
+      items: tasks,
+
+      pagination: {
+        page:
+          filters.page,
+
+        limit:
+          filters.limit,
+
+        total,
+
+        totalPages:
+          Math.ceil(
+            total /
+            filters.limit
+          )
+      }
+    };
   };
 
 export const getTaskService =

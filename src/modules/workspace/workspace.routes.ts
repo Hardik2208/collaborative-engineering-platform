@@ -47,6 +47,9 @@ from "../task-group/taskGroup.routes";
 import taskRoutes
 from "../task/task.routes";
 
+import dashboardRoutes
+from "../dashboard/dashboard.routes";
+
 import activityRoutes
 from "../activity/activity.routes";
 
@@ -127,6 +130,11 @@ router.get(
   asyncHandler(
     getWorkspace
   )
+);
+
+router.use(
+  "/:workspaceSlug/dashboard",
+  dashboardRoutes
 );
 
 export default router;

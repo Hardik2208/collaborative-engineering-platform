@@ -53,16 +53,60 @@ export const getTasks =
     res: Response
   ) => {
 
+    const {
+      status,
+      assignedToId,
+      sprintId,
+      taskGroupId,
+      page = "1",
+      limit = "20"
+    } = req.query;
+
     const tasks =
       await getTasksService(
-        req.workspace!.workspaceId
+        req.workspace!.workspaceId,
+
+        {
+          status:
+            typeof status ===
+            "string"
+              ? status
+              : undefined,
+
+          assignedToId:
+            typeof assignedToId ===
+            "string"
+              ? assignedToId
+              : undefined,
+
+          sprintId:
+            typeof sprintId ===
+            "string"
+              ? sprintId
+              : undefined,
+
+          taskGroupId:
+            typeof taskGroupId ===
+            "string"
+              ? taskGroupId
+              : undefined,
+
+          page:
+            Number(page),
+
+          limit:
+            Number(limit)
+        }
       );
 
     return apiResponse(res, {
       success: true,
+
       statusCode: 200,
+
       message:
         "Tasks fetched successfully",
+
       data: tasks
     });
   };

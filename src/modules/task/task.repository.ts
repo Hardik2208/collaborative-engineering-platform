@@ -71,40 +71,88 @@ export const findTaskById =
 
 export const findTasksByWorkspace =
   async (
-    workspaceId: string
+    workspaceId: string,
+    filters: {
+      status?: string;
+      assignedToId?: string;
+      sprintId?: string;
+      taskGroupId?: string;
+
+      page: number;
+      limit: number;
+    }
   ) => {
 
-    return prisma.task.findMany({
-      where: {
-        workspaceId
-      },
+    const where = {
+      workspaceId,
 
-      include: {
-        assignee: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true
-          }
+      ...(filters.status && {
+        status: filters.status as TaskStatus
+      }),
+
+      ...(filters.assignedToId && {
+        assignedToId:
+          filters.assignedToId
+      }),
+
+      ...(filters.sprintId && {
+        sprintId:
+          filters.sprintId
+      }),
+
+      ...(filters.taskGroupId && {
+        taskGroupId:
+          filters.taskGroupId
+      })
+    };
+
+    const total =
+      await prisma.task.count({
+        where
+      });
+
+    const tasks =
+      await prisma.task.findMany({
+        where,
+
+        include: {
+          assignee: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true
+            }
+          },
+
+          creator: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true
+            }
+          },
+
+          sprint: true,
+
+          taskGroup: true
         },
 
-        creator: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true
-          }
+        orderBy: {
+          createdAt: "desc"
         },
 
-        sprint: true,
+        skip:
+          (filters.page - 1) *
+          filters.limit,
 
-        taskGroup: true
-      },
+        take:
+          filters.limit
+      });
 
-      orderBy: {
-        createdAt: "desc"
-      }
-    });
+    return {
+      tasks,
+      total
+    };
   };
 
 export const findSprintById =
