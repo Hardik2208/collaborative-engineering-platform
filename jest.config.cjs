@@ -7,6 +7,10 @@ module.exports = {
     "<rootDir>/tests"
   ],
 
+  setupFilesAfterEnv: [
+    "<rootDir>/tests/setup.ts"
+  ],
+
   moduleFileExtensions: [
     "ts",
     "js"
