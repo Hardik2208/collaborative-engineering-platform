@@ -17,16 +17,28 @@ export const getActivity =
     res: Response
   ) => {
 
+    const {
+      page = "1",
+      limit = "20"
+    } = req.query;
+
     const activity =
       await getWorkspaceActivity(
-        req.workspace!.workspaceId
+        req.workspace!.workspaceId,
+
+        Number(page),
+
+        Number(limit)
       );
 
     return apiResponse(res, {
       success: true,
+
       statusCode: 200,
+
       message:
         "Activity fetched successfully",
+
       data: activity
     });
   };

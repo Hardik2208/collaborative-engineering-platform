@@ -21,10 +21,33 @@ export const createActivityEvent =
 
 export const getWorkspaceActivity =
   async (
-    workspaceId: string
+    workspaceId: string,
+    page: number,
+    limit: number
   ) => {
 
-    return findWorkspaceActivity(
-      workspaceId
-    );
+    const {
+      activities,
+      total
+    } =
+      await findWorkspaceActivity(
+        workspaceId,
+        page,
+        limit
+      );
+
+    return {
+      items: activities,
+
+      pagination: {
+        page,
+        limit,
+        total,
+
+        totalPages:
+          Math.ceil(
+            total / limit
+          )
+      }
+    };
   };

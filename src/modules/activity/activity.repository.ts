@@ -21,34 +21,55 @@ export const createActivityEvent =
 
 export const findWorkspaceActivity =
   async (
-    workspaceId: string
+    workspaceId: string,
+    page: number,
+    limit: number
   ) => {
 
-    return prisma.activityEvent.findMany({
-      where: {
-        workspaceId
-      },
+    const total =
+      await prisma.activityEvent.count({
+        where: {
+          workspaceId
+        }
+      });
 
-      include: {
-        actor: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true
+    const activities =
+      await prisma.activityEvent.findMany({
+        where: {
+          workspaceId
+        },
+
+        include: {
+          actor: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true
+            }
+          },
+
+          task: {
+            select: {
+              id: true,
+              title: true,
+              status: true
+            }
           }
         },
 
-        task: {
-          select: {
-            id: true,
-            title: true,
-            status: true
-          }
-        }
-      },
+        orderBy: {
+          createdAt: "desc"
+        },
 
-      orderBy: {
-        createdAt: "desc"
-      }
-    });
+        skip:
+          (page - 1) * limit,
+
+        take:
+          limit
+      });
+
+    return {
+      activities,
+      total
+    };
   };
