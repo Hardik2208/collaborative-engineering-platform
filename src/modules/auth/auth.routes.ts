@@ -27,26 +27,44 @@ import {
   authenticate
 } from "../../core/middleware/auth.middleware";
 
+import {
+  authLimiter
+} from "../../core/middleware/rateLimit.middleware";
+
 const router = Router();
 
 router.post(
   "/register",
 
-  validate(registerSchema),
+  authLimiter,
 
-  asyncHandler(register)
+  validate(
+    registerSchema
+  ),
+
+  asyncHandler(
+    register
+  )
 );
 
 router.post(
   "/login",
 
-  validate(loginSchema),
+  authLimiter,
 
-  asyncHandler(login)
+  validate(
+    loginSchema
+  ),
+
+  asyncHandler(
+    login
+  )
 );
 
 router.post(
   "/refresh",
+
+  authLimiter,
 
   validate(
     refreshSchema
@@ -57,16 +75,10 @@ router.post(
   )
 );
 
-router.get(
-  "/me",
-
-  asyncHandler(authenticate),
-
-  asyncHandler(me)
-);
-
 router.post(
   "/logout",
+
+  authLimiter,
 
   validate(
     refreshSchema
@@ -74,6 +86,18 @@ router.post(
 
   asyncHandler(
     logout
+  )
+);
+
+router.get(
+  "/me",
+
+  asyncHandler(
+    authenticate
+  ),
+
+  asyncHandler(
+    me
   )
 );
 

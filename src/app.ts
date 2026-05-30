@@ -1,10 +1,16 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import morgan from "morgan";
-
+import {
+  requestLogger
+}
+from "./core/middleware/logger.middleware";
 import routes from "./routes";
 import { errorMiddleware } from "./core/middleware/error.middleware";
+
+import {
+  generalLimiter
+} from "./core/middleware/rateLimit.middleware";
 
 const app = express();
 
@@ -14,7 +20,9 @@ app.use(helmet());
 
 app.use(express.json());
 
-app.use(morgan("dev"));
+app.use(generalLimiter);
+
+app.use(requestLogger);
 
 app.use("/api", routes);
 

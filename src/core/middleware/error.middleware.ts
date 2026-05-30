@@ -1,22 +1,62 @@
-import { NextFunction, Request, Response } from "express";
+import {
+  NextFunction,
+  Request,
+  Response
+} from "express";
 
-import { AppError } from "../errors/AppError";
+import crypto from "crypto";
 
-export const errorMiddleware = (
-  error: Error,
-  _: Request,
-  res: Response,
-  __: NextFunction
-) => {
-  if (error instanceof AppError) {
-    return res.status(error.statusCode).json({
-      success: false,
-      message: error.message
-    });
-  }
+import {
+  AppError
+} from "../errors/AppError";
 
-  return res.status(500).json({
+import {
+  logger
+} from "../../config/logger";
+
+export const errorMiddleware =
+  (
+    error: Error,
+    req: Request,
+    res: Response,
+    _: NextFunction
+  ) => {
+    const errorId =
+  crypto.randomUUID();
+    const requestId =
+      req.requestId;
+
+    logger.error({
+  errorId,
+  requestId,
+  method: req.method,
+  url: req.originalUrl,
+  message: error.message,
+  stack: error.stack
+});
+
+    if (
+  error instanceof AppError
+) {
+
+  return res.status(
+    error.statusCode
+  ).json({
     success: false,
-    message: "Internal Server Error"
+
+    requestId,
+
+    errorId,
+
+    message:
+      error.message
   });
-};
+}
+
+   return res.status(500).json({
+  success: false,
+  requestId,
+  errorId,
+  message: "Internal Server Error"
+});
+  };
