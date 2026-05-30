@@ -6,7 +6,7 @@
 
     "moduleResolution": "node",
 
-    "rootDir": "./src",
+    "rootDir": ".",
 
     "outDir": "./dist",
 
@@ -20,14 +20,23 @@
 
     "resolveJsonModule": true,
 
-    "types": ["node"],
+    "types": [
+      "node",
+      "jest"
+    ],
 
     "sourceMap": true,
 
     "ignoreDeprecations": "6.0"
   },
 
-  "include": ["src"],
+  "include": [
+    "src",
+    "tests"
+  ],
 
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

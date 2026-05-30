@@ -12,9 +12,13 @@ import {
   findOrganizationMembership
 } from "../../modules/organization/organization.repository";
 
+interface OrganizationParams {
+  slug: string;
+}
+
 export const requireOrganizationAccess =
   async (
-    req: Request,
+    req: Request<OrganizationParams>,
     _: Response,
     next: NextFunction
   ) => {
