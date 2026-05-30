@@ -4,12 +4,15 @@ from "express";
 import {
   login,
   me,
-  register
+  register,
+  refresh,
+  logout
 } from "./auth.controller";
 
 import {
   loginSchema,
-  registerSchema
+  registerSchema,
+  refreshSchema
 } from "./auth.schema";
 
 import {
@@ -42,12 +45,36 @@ router.post(
   asyncHandler(login)
 );
 
+router.post(
+  "/refresh",
+
+  validate(
+    refreshSchema
+  ),
+
+  asyncHandler(
+    refresh
+  )
+);
+
 router.get(
   "/me",
 
   asyncHandler(authenticate),
 
   asyncHandler(me)
+);
+
+router.post(
+  "/logout",
+
+  validate(
+    refreshSchema
+  ),
+
+  asyncHandler(
+    logout
+  )
 );
 
 export default router;

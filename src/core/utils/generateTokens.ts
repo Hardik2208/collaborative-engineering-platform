@@ -3,26 +3,49 @@ import jwt, {
   SignOptions
 } from "jsonwebtoken";
 
-import { env } from "../../config/env";
+import crypto from "crypto";
 
-export const generateToken = (
-  userId: string
-) => {
-  const payload = {
-    userId
+import { env }
+from "../../config/env";
+
+export const generateAccessToken =
+  (
+    userId: string
+  ) => {
+
+    const payload = {
+      userId
+    };
+
+    const secret: Secret =
+      env.JWT_SECRET;
+
+    const options: SignOptions = {
+      expiresIn: "15m"
+    };
+
+    return jwt.sign(
+      payload,
+      secret,
+      options
+    );
   };
 
-  const secret: Secret =
-    env.JWT_SECRET;
+export const generateRefreshToken =
+  () => {
 
-  const options: SignOptions = {
-    expiresIn:
-      env.JWT_EXPIRES_IN as SignOptions["expiresIn"]
+    return crypto
+      .randomBytes(64)
+      .toString("hex");
   };
 
-  return jwt.sign(
-    payload,
-    secret,
-    options
-  );
-};
+export const hashRefreshToken =
+  (
+    token: string
+  ) => {
+
+    return crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+  };

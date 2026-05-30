@@ -7,6 +7,19 @@ import {
 } from "../../core/errors/UnauthorizedError";
 
 import {
+  generateAccessToken,
+  generateRefreshToken,
+  hashRefreshToken
+}
+from "../../core/utils/generateTokens";
+
+
+import {
+  findRefreshToken,
+  deleteRefreshToken
+} from "./auth.repository";
+
+import {
   hashPassword
 } from "../../core/utils/hashPassword";
 
@@ -14,13 +27,11 @@ import {
   comparePassword
 } from "../../core/utils/comparePassword";
 
-import {
-  generateToken
-} from "../../core/utils/generateTokens";
 
 import {
   createUser,
-  findUserByEmail
+  findUserByEmail,
+  createRefreshToken
 } from "./auth.repository";
 
 export const registerUser =
@@ -53,15 +64,38 @@ export const registerUser =
         passwordHash
       });
 
-    const token =
-      generateToken(
-        user.id
-      );
+    const accessToken =
+  generateAccessToken(
+    user.id
+  );
 
-    return {
-      user,
-      token
-    };
+const refreshToken =
+  generateRefreshToken();
+
+await createRefreshToken(
+  hashRefreshToken(
+    refreshToken
+  ),
+
+  user.id,
+
+  new Date(
+    Date.now() +
+    7 * 24 * 60 * 60 * 1000
+  )
+);
+const sanitizedUser = {
+  id: user.id,
+  email: user.email,
+  fullName: user.fullName,
+  createdAt: user.createdAt
+};
+
+return {
+  user: sanitizedUser,
+  accessToken,
+  refreshToken
+};
   };
 
 export const loginUser =
@@ -93,10 +127,26 @@ export const loginUser =
       );
     }
 
-    const token =
-      generateToken(
-        user.id
-      );
+    const accessToken =
+  generateAccessToken(
+    user.id
+  );
+
+const refreshToken =
+  generateRefreshToken();
+
+await createRefreshToken(
+  hashRefreshToken(
+    refreshToken
+  ),
+
+  user.id,
+
+  new Date(
+    Date.now() +
+    7 * 24 * 60 * 60 * 1000
+  )
+);
 
     const sanitizedUser = {
   id: user.id,
@@ -110,6 +160,109 @@ export const loginUser =
 
 return {
   user: sanitizedUser,
-  token
+
+  accessToken,
+
+  refreshToken
 };
+  };
+
+export const refreshAccessToken =
+  async (
+    refreshToken: string
+  ) => {
+
+    const hashedToken =
+      hashRefreshToken(
+        refreshToken
+      );
+
+    const storedToken =
+      await findRefreshToken(
+        hashedToken
+      );
+
+    if (!storedToken) {
+
+      throw new UnauthorizedError(
+        "Invalid refresh token"
+      );
+    }
+
+    if (
+      storedToken.expiresAt <
+      new Date()
+    ) {
+
+      await deleteRefreshToken(
+        hashedToken
+      );
+
+      throw new UnauthorizedError(
+        "Refresh token expired"
+      );
+    }
+
+    await deleteRefreshToken(
+      hashedToken
+    );
+
+    const newRefreshToken =
+      generateRefreshToken();
+
+    const hashedNewToken =
+      hashRefreshToken(
+        newRefreshToken
+      );
+
+    await createRefreshToken(
+      hashedNewToken,
+
+      storedToken.userId,
+
+      new Date(
+        Date.now() +
+        7 *
+          24 *
+          60 *
+          60 *
+          1000
+      )
+    );
+
+    const accessToken =
+      generateAccessToken(
+        storedToken.userId
+      );
+
+    return {
+      accessToken,
+
+      refreshToken:
+        newRefreshToken
+    };
+  };
+
+  export const logoutUser =
+  async (
+    refreshToken: string
+  ) => {
+
+    const hashedToken =
+      hashRefreshToken(
+        refreshToken
+      );
+
+    const storedToken =
+      await findRefreshToken(
+        hashedToken
+      );
+
+    if (!storedToken) {
+      return;
+    }
+
+    await deleteRefreshToken(
+      hashedToken
+    );
   };

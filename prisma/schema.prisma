@@ -50,6 +50,8 @@ model User {
   createdTasks Task[] @relation("CreatedTasks")
 
   activityEvents ActivityEvent[] @relation("ActorEvents")
+
+  refreshTokens RefreshToken[]
 }
 
 model Organization {
@@ -215,4 +217,16 @@ model ActivityEvent {
   task Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
 
   actor User @relation("ActorEvents", fields: [actorId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

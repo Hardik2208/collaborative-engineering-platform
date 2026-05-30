@@ -5,12 +5,17 @@ import {
 
 import {
   loginUser,
-  registerUser
+  registerUser,
+  logoutUser
 } from "./auth.service";
 
 import {
   apiResponse
 } from "../../core/responses/apiResponse";
+
+import {
+  refreshAccessToken
+} from "./auth.service";
 
 export const register =
   async (
@@ -87,5 +92,56 @@ export const me =
         "Current user fetched",
 
       data: req.user
+    });
+  };
+
+  export const refresh =
+  async (
+    req: Request,
+    res: Response
+  ) => {
+
+    const {
+      refreshToken
+    } = req.body;
+
+    const result =
+      await refreshAccessToken(
+        refreshToken
+      );
+
+    return apiResponse(res, {
+      success: true,
+
+      statusCode: 200,
+
+      message:
+        "Token refreshed successfully",
+
+      data: result
+    });
+  };
+
+  export const logout =
+  async (
+    req: Request,
+    res: Response
+  ) => {
+
+    const {
+      refreshToken
+    } = req.body;
+
+    await logoutUser(
+      refreshToken
+    );
+
+    return apiResponse(res, {
+      success: true,
+
+      statusCode: 200,
+
+      message:
+        "Logged out successfully"
     });
   };
