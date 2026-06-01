@@ -1,23 +1,29 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16
 
-    container_name: collaborative_platform_db
-
-    restart: always
-
     environment:
+      POSTGRES_DB: collab_engineering
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: collab_engineering
 
     ports:
       - "5432:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+
+    depends_on:
+      - postgres
+
+    env_file:
+      - .env
+
+    ports:
+      - "3000:3000"
 
 volumes:
   postgres_data:
