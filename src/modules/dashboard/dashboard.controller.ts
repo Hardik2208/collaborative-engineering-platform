@@ -19,7 +19,7 @@ export const getDashboard =
 
     const dashboard =
       await getWorkspaceDashboard(
-        req.workspace!.id
+        req.workspace!.workspaceId
       );
 
     return apiResponse(res, {

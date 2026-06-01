@@ -1,15 +1,38 @@
 import { prisma } from "../../shared/prisma/prisma.service";
 
+
 export const countTasks =
   async (
     workspaceId: string
   ) => {
 
-    return prisma.task.count({
-      where: {
-        workspaceId
-      }
-    });
+    console.log("DASHBOARD REPOSITORY LOADED");
+
+console.log(
+  "COUNT TASKS CALLED",
+  workspaceId
+);
+
+    const tasks =
+      await prisma.task.findMany({
+        where: {
+          workspaceId
+        },
+
+        select: {
+          id: true,
+          title: true,
+          workspaceId: true
+        }
+      });
+
+    console.log(
+      "COUNT TASKS",
+      workspaceId,
+      tasks.length
+    );
+
+    return tasks.length;
   };
 
 export const countTasksByStatus =
@@ -21,12 +44,34 @@ export const countTasksByStatus =
       | "DONE"
   ) => {
 
-    return prisma.task.count({
-      where: {
-        workspaceId,
-        status
-      }
-    });
+    console.log("DASHBOARD REPOSITORY LOADED");
+
+console.log(
+  "COUNT TASKS CALLED",
+  workspaceId
+);
+
+    const tasks =
+      await prisma.task.findMany({
+        where: {
+          workspaceId,
+          status
+        },
+
+        select: {
+          id: true,
+          status: true
+        }
+      });
+
+    console.log(
+      "COUNT STATUS",
+      workspaceId,
+      status,
+      tasks.length
+    );
+
+    return tasks.length;
   };
 
 export const findActiveSprint =
@@ -34,19 +79,35 @@ export const findActiveSprint =
     workspaceId: string
   ) => {
 
-    return prisma.sprint.findFirst({
-      where: {
-        workspaceId,
-        status: "ACTIVE"
-      },
+    console.log("DASHBOARD REPOSITORY LOADED");
 
-      select: {
-        id: true,
-        name: true,
-        startDate: true,
-        endDate: true
-      }
-    });
+console.log(
+  "COUNT TASKS CALLED",
+  workspaceId
+);
+
+    const sprint =
+      await prisma.sprint.findFirst({
+        where: {
+          workspaceId,
+          status: "ACTIVE"
+        },
+
+        select: {
+          id: true,
+          name: true,
+          startDate: true,
+          endDate: true
+        }
+      });
+
+    console.log(
+      "ACTIVE SPRINT",
+      workspaceId,
+      sprint?.id
+    );
+
+    return sprint;
   };
 
 export const countRecentActivity =
@@ -54,6 +115,12 @@ export const countRecentActivity =
     workspaceId: string
   ) => {
 
+    console.log("DASHBOARD REPOSITORY LOADED");
+
+console.log(
+  "COUNT TASKS CALLED",
+  workspaceId
+);
     const thirtyDaysAgo =
       new Date();
 
@@ -61,13 +128,22 @@ export const countRecentActivity =
       thirtyDaysAgo.getDate() - 30
     );
 
-    return prisma.activityEvent.count({
-      where: {
-        workspaceId,
+    const count =
+      await prisma.activityEvent.count({
+        where: {
+          workspaceId,
 
-        createdAt: {
-          gte: thirtyDaysAgo
+          createdAt: {
+            gte: thirtyDaysAgo
+          }
         }
-      }
-    });
+      });
+
+    console.log(
+      "RECENT ACTIVITY",
+      workspaceId,
+      count
+    );
+
+    return count;
   };

@@ -10,6 +10,15 @@ export const getWorkspaceDashboard =
     workspaceId: string
   ) => {
 
+    console.log(
+      "\n=============================="
+    );
+
+    console.log(
+      "DASHBOARD WORKSPACE:",
+      workspaceId
+    );
+
     const [
       totalTasks,
       todoTasks,
@@ -43,6 +52,40 @@ export const getWorkspaceDashboard =
         workspaceId
       )
     ]);
+
+    console.log(
+      "TOTAL TASKS:",
+      totalTasks
+    );
+
+    console.log(
+      "TODO TASKS:",
+      todoTasks
+    );
+
+    console.log(
+      "IN PROGRESS TASKS:",
+      inProgressTasks
+    );
+
+    console.log(
+      "DONE TASKS:",
+      doneTasks
+    );
+
+    console.log(
+      "ACTIVE SPRINT:",
+      activeSprint
+    );
+
+    console.log(
+      "RECENT ACTIVITY:",
+      recentActivityCount
+    );
+
+    console.log(
+      "==============================\n"
+    );
 
     return {
       totalTasks,
